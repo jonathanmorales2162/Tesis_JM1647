@@ -1,35 +1,46 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React, { useState } from 'react';
+import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
+import styled from 'styled-components';
+import Login from './components/Login';
+import OrdersList from './components/OrdersList';
+import OrderDetail from './components/OrderDetail';
+import Profile from './components/Profile';
+import Dashboard from './components/Dashboard';
 
-function App() {
-  const [count, setCount] = useState(0)
+const MainContainer = styled.div`
+  transition: margin-left 0.3s;
+  margin-left: ${(props) => (props.isOpen ? '250px' : '50px')};
+`;
+
+const App = () => {
+  const location = useLocation();
+  const [isOpen, setIsOpen] = useState(false);
+
+  const toggleSidebar = () => {
+    setIsOpen(!isOpen);
+  };
+
+  const showDashboard = location.pathname !== '/';
 
   return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+    <div>
+      {showDashboard && <Dashboard isOpen={isOpen} toggleSidebar={toggleSidebar} />}
+      <MainContainer isOpen={isOpen}>
+        <Routes>
+          <Route path="/" element={<Login />} />
+          <Route path="/orders" element={<OrdersList />} />
+          <Route path="/order/:id" element={<OrderDetail />} />
+          <Route path="/profile" element={<Profile />} />
+        </Routes>
+      </MainContainer>
+    </div>
+  );
+};
 
-export default App
+const WrappedApp = () => (
+  <Router>
+    <App />
+  </Router>
+);
+
+export default WrappedApp;
