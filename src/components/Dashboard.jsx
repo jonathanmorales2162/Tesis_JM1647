@@ -1,82 +1,32 @@
-import React, { useState } from 'react';
-import styled from 'styled-components';
+import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaBars } from 'react-icons/fa';
 
-const SidebarContainer = styled.div`
-  position: fixed;
-  height: 100%;
-  width: ${(props) => (props.isOpen ? '250px' : '50px')};
-  background-color: #1e1e1e;
-  padding-top: 20px;
-  transition: width 0.3s;
-  overflow: hidden;
-  z-index: 1000; /* Ensure the sidebar is on top */
-`;
-
-const SidebarLink = styled(Link)`
-  display: block;
-  padding: 15px 20px;
-  text-decoration: none;
-  color: #e0e0e0;
-  white-space: nowrap;
-  &:hover {
-    background-color: #333;
-  }
-`;
-
-const LogoutButton = styled.button`
-  display: block;
-  width: 100%;
-  padding: 15px 20px;
-  background-color: #28a745;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  text-align: left;
-  white-space: nowrap;
-  &:hover {
-    background-color: #218838;
-  }
-`;
-
-const ToggleButton = styled.button`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  padding: 15px;
-  background-color: #1e1e1e;
-  color: #e0e0e0;
-  border: none;
-  cursor: pointer;
-  &:hover {
-    background-color: #333;
-  }
-`;
-
-const Dashboard = ({ isOpen, toggleSidebar }) => {
+const Dashboard = ({ isOpen, toggleSidebar, setIsOpen }) => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    // Aquí puedes agregar la lógica de deslogueo
-    navigate('/');
+    setIsOpen(false);  // Asegurarse de cerrar el Dashboard
+    localStorage.removeItem('userId');  // Suponiendo que guardas el userId en localStorage
+    navigate('/login');  // Ajusta esto según tu ruta de login
   };
 
+  const sidebarClass = `d-flex flex-column bg-dark text-white ${isOpen ? 'w-250px' : 'w-50px'}`;  // Clase para controlar el ancho del sidebar
+
   return (
-    <SidebarContainer isOpen={isOpen}>
-      <ToggleButton onClick={toggleSidebar}>
+    <div className={`${sidebarClass} position-fixed h-100 overflow-auto transition-width`} style={{ zIndex: 1000 }}>
+      <button onClick={toggleSidebar} className="btn btn-dark d-flex align-items-center justify-content-center p-3">
         <FaBars />
-      </ToggleButton>
+      </button>
       {isOpen && (
         <>
-          <SidebarLink to="/orders">Órdenes</SidebarLink>
-          <SidebarLink to="/profile">Perfil</SidebarLink>
-          <LogoutButton onClick={handleLogout}>Cerrar sesión</LogoutButton>
+          <Link to="/orders" className="btn btn-dark text-start text-white py-3 px-4 w-100">Órdenes</Link>
+          <Link to="/profile" className="btn btn-dark text-start text-white py-3 px-4 w-100">Perfil</Link>
+          <Link to="/messages" className="btn btn-dark text-start text-white py-3 px-4 w-100">Mensajes</Link>
+          <button onClick={handleLogout} className="btn btn-success text-start py-3 px-4 w-100">Cerrar sesión</button>
         </>
       )}
-    </SidebarContainer>
+    </div>
   );
 };
 

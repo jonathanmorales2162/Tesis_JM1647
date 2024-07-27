@@ -40,3 +40,20 @@
 .read-the-docs {
   color: #888;
 }
+
+.w-250px {
+  width: 250px;
+}
+
+.w-50px {
+  width: 50px;
+}
+
+.main-container.shifted {
+  margin-left: 250px;  
+}
+
+.main-container {
+  transition: margin-left 0.3s ease;
+  margin-left: 0;
+}

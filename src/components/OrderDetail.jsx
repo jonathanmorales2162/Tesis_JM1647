@@ -1,46 +1,55 @@
-import React from 'react';
-import styled from 'styled-components';
+import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-
-const OrderDetailContainer = styled.div`
-  padding: 20px;
-  background-color: #121212;
-  color: #e0e0e0;
-`;
-
-const BackButton = styled.button`
-  padding: 10px;
-  margin-bottom: 20px;
-  background-color: #28a745;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  &:hover {
-    background-color: #218838;
-  }
-`;
 
 const OrderDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [order, setOrder] = useState(null);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    const fetchOrder = async () => {
+      try {
+        const response = await fetch(`http://localhost:3000/orders/${id}`);
+
+        if (!response.ok) {
+          const { message } = await response.json();
+          setError(message);
+          return;
+        }
+
+        const data = await response.json();
+        setOrder(data);
+      } catch (error) {
+        setError('Error al conectar con el servidor');
+      }
+    };
+
+    fetchOrder();
+  }, [id]);
 
   const handleBack = () => {
     navigate('/orders');
   };
 
   return (
-    <OrderDetailContainer>
-      <BackButton onClick={handleBack}>Volver a las órdenes</BackButton>
-      <h1>Orden #{id}</h1>
-      <p>Número de orden: {id}</p>
-      <p>Estado: Revisión</p>
-      <p>Tipo: Limpieza</p>
-      <p>
-        Observaciones: El equipo presenta suciedad en ventiladores y adicional
-        se necesita un cambio de pasta térmica.
-      </p>
-    </OrderDetailContainer>
+    <div className="container mt-3 p-3 bg-dark text-white" style={{ minHeight: '100vh' }}>
+      <button onClick={handleBack} className="btn btn-primary mb-3">Volver a las órdenes</button>
+      {error && <div className="alert alert-danger">{error}</div>}
+      {order ? (
+        <div className="card bg-secondary text-white p-3 rounded">
+          <h1>Detalle de la Orden #{order.OrderID}</h1>
+          <p>Número de orden: {order.OrderID}</p>
+          <p>Estado: {order.Status}</p>
+          <p>Tipo: {order.Type}</p>
+          <p>Observaciones: {order.Observations}</p>
+          <p>Creado: {new Date(order.CreatedAt).toLocaleString()}</p>
+          <p>Actualizado: {new Date(order.UpdatedAt).toLocaleString()}</p>
+        </div>
+      ) : (
+        <div>Cargando...</div>
+      )}
+    </div>
   );
 };
 

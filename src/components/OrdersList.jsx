@@ -1,44 +1,54 @@
-import React from 'react';
-import styled from 'styled-components';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
-const OrdersContainer = styled.div`
-  padding: 20px;
-  background-color: #121212;
-  color: #e0e0e0;
-`;
-
-const OrderItem = styled.div`
-  border: 1px solid #333;
-  border-radius: 8px;
-  padding: 10px;
-  margin: 10px 0;
-  background-color: #1e1e1e;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-`;
-
-const OrderLink = styled(Link)`
-  color: #90caf9;
-  text-decoration: none;
-  &:hover {
-    text-decoration: underline;
-  }
-`;
-
 const OrdersList = () => {
+  const [clients, setClients] = useState([]);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchOrders = async () => {
+      const userId = localStorage.getItem('userId');
+      if (!userId) {
+        setError('No se encontró el ID del usuario');
+        return;
+      }
+
+      try {
+        const response = await fetch(`http://localhost:3000/users/${userId}/orders`);
+
+        if (!response.ok) {
+          const { message } = await response.json();
+          setError(message);
+          return;
+        }
+
+        const data = await response.json();
+        setOrders(data);
+      } catch (error) {
+        setError('Error al conectar con el servidor');
+      }
+    };
+
+    fetchOrders();
+  }, []);
+
   return (
-    <OrdersContainer>
+    <div className="container mt-3 p-3 bg-dark text-light">
       <h1>Órdenes</h1>
-      <input type="text" placeholder="Buscar" />
-      {[1, 2, 3, 4].map(order => (
-        <OrderItem key={order}>
-          <p>Número de orden: {order}</p>
-          <p>Estado: Revisión</p>
-          <p>Tipo: Limpieza</p>
-          <OrderLink to={`/order/${order}`}>Ver detalles</OrderLink>
-        </OrderItem>
+      {error && <div className="alert alert-danger">{error}</div>}
+      {orders.map(order => (
+        <div key={order.OrderID} className="card text-light bg-secondary mb-3">
+          <div className="card-header">Orden #{order.OrderID}</div>
+          <div className="card-body">
+            <h5 className="card-title">{order.Status}</h5>
+            <p className="card-text">{order.Type}</p>
+            <p className="card-text">{order.Observations}</p>
+            <Link to={`/orders/${order.OrderID}`} className="btn btn-primary">Ver Detalles</Link>
+          </div>
+        </div>
       ))}
-    </OrdersContainer>
+    </div>
   );
 };
 
